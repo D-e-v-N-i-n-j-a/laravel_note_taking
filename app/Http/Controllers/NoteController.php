@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreNoteRequest;
 use App\Http\Requests\UpdateNoteRequest;
 use App\Models\Note;
-
+use Illuminate\Http\Request;
 class NoteController extends Controller
 {
     /**
@@ -13,15 +13,34 @@ class NoteController extends Controller
      */
     public function index()
     {
-        //
+        //GET ALL NOTES
+        $notes = Note::all();
+
+        return view('index', compact('notes'));
+
     }
 
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create(Request $request)
     {
-        //
+        $fields = $request->validate([
+            'title'=>['required'],
+            'description'=>['required']
+        ]);
+
+        $note = new Note();
+        
+        $note->title=$fields['title'];
+        $note->description=$fields['description'];
+        $note->user_id = auth()->id();
+        
+        $note->save();
+
+        return redirect()->route('home')->with('success','Note created Successfully');
+
+        
     }
 
     /**
@@ -61,6 +80,13 @@ class NoteController extends Controller
      */
     public function destroy(Note $note)
     {
-        //
+        if ($note->user_id !== auth()->id()) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $note->delete();
+
+        return redirect()->route('home')->with('success', 'Note deleted successfully');
+
     }
 }

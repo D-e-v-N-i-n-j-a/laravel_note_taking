@@ -1,15 +1,17 @@
 <?php
 
 use App\Http\Controllers\AuthControllers;
+use App\Http\Controllers\NoteController;
 use Illuminate\Support\Facades\Route;
 
 
 // AUTH MIDDLE WARES
-
 Route::middleware(['auth'])->group(function () {
-    Route::view('/', 'index')->name('home');
+    Route::get('/', [NoteController::class, 'index'])->name('home');
     Route::view('/create', 'pages.create')->name('create');
-});;
+    Route::post('/create',[NoteController::class,'create']);
+    Route::delete('/notes/{note}', [NoteController::class, 'destroy'])->name('destroy');
+});
 
 // GUEST MIDDLEWARE 
 Route::middleware('guest')->group(function () {
